@@ -200,15 +200,7 @@ async function migrate() {
       `, [a.id, new Date(a.at).toISOString(), a.userId, a.user, a.action, a.entity, a.entityId]);
     }
 
-    // Actualizar secuencias
-    console.log('Actualizando secuencias de IDs...');
-    await client.query(`SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));`);
-    await client.query(`SELECT setval('clients_id_seq', (SELECT MAX(id) FROM clients));`);
-    await client.query(`SELECT setval('technicians_id_seq', (SELECT MAX(id) FROM technicians));`);
-    await client.query(`SELECT setval('materials_id_seq', (SELECT MAX(id) FROM materials));`);
-    await client.query(`SELECT setval('orders_id_seq', (SELECT MAX(id) FROM orders));`);
-    await client.query(`SELECT setval('audit_id_seq', (SELECT MAX(id) FROM audit));`);
-    // order_materials y order_photos usan la secuencia normal porque no le pasamos id
+// CockroachDB maneja los SERIAL automáticamente (unique_rowid), no requiere setval.
 
     console.log('¡Migración completada exitosamente!');
   } catch (error) {
