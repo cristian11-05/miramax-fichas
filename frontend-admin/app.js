@@ -1,4 +1,4 @@
-const API=localStorage.getItem('apiUrl')||'http://localhost:4000/api';
+const API=localStorage.getItem('apiUrl')||'https://fiberlink-backend.onrender.com/api';
 let token=localStorage.getItem('adminToken')||'';let user=JSON.parse(localStorage.getItem('adminUser')||'null');let current='Dashboard';let cache={};
 const el=s=>document.querySelector(s);const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 async function api(path,opt={}){const r=await fetch(API+path,{...opt,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`,...opt.headers}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'Error');return d}

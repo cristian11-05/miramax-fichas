@@ -1,4 +1,4 @@
-const API=localStorage.getItem('apiUrl')||'http://localhost:4000/api';let token=localStorage.getItem('techToken')||'';let user=JSON.parse(localStorage.getItem('techUser')||'null');let orders=[];let currentOrder=null;let draftMaterials=[];let signatureData='';
+const API=localStorage.getItem('apiUrl')||'https://fiberlink-backend.onrender.com/api';let token=localStorage.getItem('techToken')||'';let user=JSON.parse(localStorage.getItem('techUser')||'null');let orders=[];let currentOrder=null;let draftMaterials=[];let signatureData='';
 const app=document.querySelector('#app');const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[m]));
 async function api(path,opt={}){const r=await fetch(API+path,{...opt,headers:{'Content-Type':'application/json',Authorization:`Bearer ${token}`,...opt.headers}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.message||'Error');return d}
 function toast(s){const d=document.createElement('div');d.className='toast';d.textContent=s;document.body.append(d);setTimeout(()=>d.remove(),2200)}
