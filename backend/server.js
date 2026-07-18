@@ -13,7 +13,7 @@ const PORT = Number(process.env.PORT || 4000);
 const sessions = new Map();
 
 // CockroachDB Connection
-const connectionString = 'postgresql://franco_huaman_tecsup:iO2El4JvzFmf5KFnBljzvQ@sonic-wilddog-29676.j77.aws-us-east-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full';
+const connectionString = process.env.DATABASE_URL || 'postgresql://franco_huaman_tecsup:iO2El4JvzFmf5KFnBljzvQ@sonic-wilddog-29676.j77.aws-us-east-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full';
 const pool = new Pool({ connectionString });
 
 const json = (res, status, data) => {

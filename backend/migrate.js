@@ -7,7 +7,7 @@ const { Client } = pkg;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_FILE = path.join(__dirname, 'data', 'db.json');
 
-const connectionString = 'postgresql://franco_huaman_tecsup:iO2El4JvzFmf5KFnBljzvQ@sonic-wilddog-29676.j77.aws-us-east-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full';
+const connectionString = process.env.DATABASE_URL || 'postgresql://franco_huaman_tecsup:iO2El4JvzFmf5KFnBljzvQ@sonic-wilddog-29676.j77.aws-us-east-1.cockroachlabs.cloud:26257/defaultdb?sslmode=verify-full';
 
 async function migrate() {
   console.log('Iniciando migración a CockroachDB...');
