@@ -344,7 +344,16 @@ add('PATCH', '/api/orders/:id', async (req, res, p) => {
   // Security check
   const check = await pool.query('SELECT technician_id FROM orders WHERE id = $1', [p.id]);
   if (check.rows.length === 0) return json(res, 404, { message: 'Orden no encontrada' });
-  if (u.role === 'technician' && check.rows[0].technician_id !== u.technicianId) return json(res, 403, { message: 'No asignada' });
+  if (u.role === 'technician' && Number(check.rows[0].technician_id) !== Number(u.technicianId)) return json(res, 403, { message: 'No asignada' });
+
+  // Handle materials separately (not a column in orders table)
+  if (d.materials && Array.isArray(d.materials)) {
+    await pool.query('DELETE FROM order_materials WHERE order_id = $1', [p.id]);
+    for (const m of d.materials) {
+      await pool.query('INSERT INTO order_materials (order_id, material_id, quantity) VALUES ($1, $2, $3)', [p.id, m.materialId, m.quantity]);
+    }
+    delete d.materials;
+  }
 
   const keys = Object.keys(d);
   if (keys.length > 0) {
@@ -364,7 +373,7 @@ add('POST', '/api/orders/:id/start', async (req, res, p) => {
   if (!u) return;
   const check = await pool.query('SELECT technician_id, started_at FROM orders WHERE id = $1', [p.id]);
   if (check.rows.length === 0) return json(res, 404, { message: 'Orden no encontrada' });
-  if (u.role === 'technician' && check.rows[0].technician_id !== u.technicianId) return json(res, 403, { message: 'No asignada' });
+  if (u.role === 'technician' && Number(check.rows[0].technician_id) !== Number(u.technicianId)) return json(res, 403, { message: 'No asignada' });
 
   const startedAt = check.rows[0].started_at || new Date().toISOString();
   await pool.query('UPDATE orders SET status = $1, started_at = $2 WHERE id = $3', ['En proceso', startedAt, p.id]);
@@ -377,7 +386,7 @@ add('POST', '/api/orders/:id/complete', async (req, res, p) => {
   if (!u) return;
   const check = await pool.query('SELECT technician_id FROM orders WHERE id = $1', [p.id]);
   if (check.rows.length === 0) return json(res, 404, { message: 'Orden no encontrada' });
-  if (u.role === 'technician' && check.rows[0].technician_id !== u.technicianId) return json(res, 403, { message: 'No asignada' });
+  if (u.role === 'technician' && Number(check.rows[0].technician_id) !== Number(u.technicianId)) return json(res, 403, { message: 'No asignada' });
 
   const d = await body(req);
   
@@ -436,7 +445,7 @@ add('POST', '/api/orders/:id/photo', async (req, res, p) => {
 
 add('GET', '/api/audit', async (req, res) => {
   if (!auth(req, res, 'admin')) return;
-  const { rows } = await pool.query('SELECT * FROM audit ORDER BY id DESC');
+  const { rows } = await pool.query('SELECT id, at, user_id, user_name as "user", action, entity, entity_id FROM audit ORDER BY id DESC');
   json(res, 200, toCamelCase(rows));
 });
 
