@@ -17,10 +17,138 @@ async function home(){await loadOrders();const pending=orders.filter(x=>x.status
 }
 function orderCard(o){return `<article class="card order-card" onclick="orderDetail(${o.id})"><div class="row"><span class="order-code">${esc(o.code)}</span>${badge(o.status)}</div><h3>${esc(o.serviceType)}</h3><div>${esc(o.client?.name)}</div><p class="muted">📍 ${esc(o.client?.address)}</p><p class="muted">🗓 ${new Date(o.scheduledAt).toLocaleString('es-PE')}</p></article>`}
 async function listOrders(filter='Todas'){await loadOrders();const shown=filter==='Todas'?orders:orders.filter(x=>x.status===filter);app.innerHTML=`<div class="phone">${offlineBar()}<header class="page-head"><button class="back" onclick="home()">‹</button><h1>Mis órdenes asignadas</h1></header><div class="tabs">${['Todas','Pendiente','En proceso','Finalizada'].map(x=>`<button class="${filter===x?'active':''}" onclick="listOrders('${x}')">${x}</button>`).join('')}</div><section class="section">${shown.length?shown.map(orderCard).join(''):'<div class="empty">No hay órdenes en este estado.</div>'}</section>${nav('orders')}</div>`}
-async function orderDetail(id){currentOrder=await api('/orders/'+id);const o=currentOrder;app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="listOrders()">‹</button><h1>${esc(o.code)}</h1></header><section class="detail-block"><div class="row"><h2>${esc(o.serviceType)}</h2>${badge(o.status)}</div><p>${esc(o.description)}</p></section><section class="detail-block"><h3>Datos del cliente</h3><div class="detail-line"><span>Cliente</span><b>${esc(o.client?.name)}</b></div><div class="detail-line"><span>Teléfono</span><b>${esc(o.client?.phone)}</b></div><div class="detail-line"><span>Dirección</span><b>${esc(o.client?.address)}</b></div><div class="detail-line"><span>Referencia</span><b>${esc(o.client?.reference)}</b></div></section><section class="detail-block"><h3>Información del servicio</h3><div class="detail-line"><span>Programado</span><b>${new Date(o.scheduledAt).toLocaleString('es-PE')}</b></div><div class="detail-line"><span>Prioridad</span><b>${esc(o.priority)}</b></div><div class="detail-line"><span>Estado inicial</span><b>${esc(o.initialState)}</b></div><p>${esc(o.observations||'')}</p></section><section class="actionbar">${o.status==='Pendiente'?`<button class="primary" onclick="startOrder(${o.id})">Iniciar servicio</button>`:o.status==='En proceso'?`<button class="primary" onclick="attention(${o.id})">Continuar registro</button>`:`<button class="primary" onclick="history()">Ver historial</button>`}<br><br><button class="primary" style="background:#2675f5" onclick="openMap(${o.latitude},${o.longitude})">Abrir ruta al cliente</button></section>${nav('orders')}</div>`}
+async function orderDetail(id){currentOrder=await api('/orders/'+id);const o=currentOrder;
+app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="listOrders()">‹</button><h1>${esc(o.code)}</h1></header>
+<section class="detail-block"><div class="row"><h2>${esc(o.serviceType)}</h2>${badge(o.status)}</div><p>${esc(o.description)}</p></section>
+<section class="detail-block"><h3>Datos del cliente</h3>
+  <div class="detail-line"><span>Cliente</span><b>${esc(o.client?.name)}</b></div>
+  <div class="detail-line"><span>DNI</span><b>${esc(o.client?.dni)}</b></div>
+  <div class="detail-line"><span>Teléfono</span><b>${esc(o.client?.phone)}${o.client?.phone2?' / '+esc(o.client.phone2):''}</b></div>
+  <div class="detail-line"><span>Dirección</span><b>${esc(o.client?.address)}</b></div>
+  <div class="detail-line"><span>Referencia</span><b>${esc(o.client?.reference)}</b></div>
+</section>
+<section class="detail-block"><h3>Información del servicio</h3>
+  <div class="detail-line"><span>Programado</span><b>${new Date(o.scheduledAt).toLocaleString('es-PE')}</b></div>
+  <div class="detail-line"><span>Prioridad</span><b>${esc(o.priority)}</b></div>
+  <div class="detail-line"><span>Plan</span><b>${esc(o.plan||'-')}</b></div>
+  <div class="detail-line"><span>CTO</span><b>${esc(o.cto||'-')}</b></div>
+  <div class="detail-line"><span>Precinto</span><b>${esc(o.precinto||'-')}</b></div>
+  <div class="detail-line"><span>Sede</span><b>${esc(o.sede||'-')}</b></div>
+</section>
+<section class="actionbar">
+  ${o.status==='Pendiente'?`<button class="primary" onclick="startOrder(${o.id})">Iniciar servicio</button>`:o.status==='En proceso'?`<button class="primary" onclick="attention(${o.id})">Continuar registro</button>`:`<button class="primary" onclick="history()">Ver historial</button>`}
+  <br><br>
+  <button class="primary" style="background:#2675f5" onclick="openMap(${o.latitude},${o.longitude})">Abrir ruta al cliente</button>
+</section>${nav('orders')}</div>`}
 async function startOrder(id){currentOrder=await api('/orders/'+id+'/start',{method:'POST'});toast('Servicio iniciado');attention(id)}
 function openMap(lat,lng){window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,'_blank')}
-async function attention(id){currentOrder=await api('/orders/'+id);app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="orderDetail(${id})">‹</button><h1>Registrar atención</h1></header><form class="form" id="att"><label>Estado inicial del servicio<select name="initialState"><option>Sin servicio</option><option>Internet intermitente</option><option>Baja velocidad</option><option>Baja potencia óptica</option><option>Equipo averiado</option></select></label><label>Descripción del trabajo<textarea name="technicalNotes" id="techNotes">${esc(currentOrder.technicalNotes||'')}</textarea></label><button type="button" onclick="askAITech()" style="width:100%;margin-bottom:15px;padding:10px;border-radius:8px;border:1px solid #2675f5;background:#e8f1ff;color:#2675f5;font-weight:bold;cursor:pointer">✨ Autocompletar con IA</button><label>Observaciones<textarea name="observations">${esc(currentOrder.observations||'')}</textarea></label><button class="primary">Guardar y continuar</button></form></div>`;document.querySelector('#att').onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));currentOrder=await api('/orders/'+id,{method:'PATCH',body:JSON.stringify(d)});photos(id)}}
+async function attention(id){
+  currentOrder=await api('/orders/'+id);
+  const st=currentOrder.serviceType||'';
+  // Campos comunes: estado inicial + notas
+  let specificFields='';
+
+  if(st==='Instalación'){
+    specificFields=`
+      <label>Ubicación del equipo (ONU/router)
+        <input name="equipLocation" placeholder="Ej: 2do piso, sala, dormitorio">
+      </label>
+      <label>Nº de TVs configurados (CATV)
+        <input name="numTvs" type="number" min="0" value="0">
+      </label>
+      <label>Nivel de señal óptica (dBm)
+        <input name="signalLevel" placeholder="Ej: -18.5">
+      </label>`;
+  } else if(st==='Avería'){
+    specificFields=`
+      <label>Tipo de falla encontrada
+        <select name="faultType">
+          <option>Sin señal (fibra cortada)</option>
+          <option>Baja potencia óptica</option>
+          <option>Internet intermitente</option>
+          <option>CATV sin señal</option>
+          <option>Equipo dañado</option>
+          <option>Configuración incorrecta</option>
+          <option>Falla en CTO/Split</option>
+        </select>
+      </label>
+      <label>Acciones realizadas para corregir
+        <textarea name="actionsDone" rows="3" placeholder="Ej: Se cambió pigtail y se limpiaron conectores..."></textarea>
+      </label>
+      <label>Nivel de señal final (dBm)
+        <input name="signalLevel" placeholder="Ej: -19.0">
+      </label>`;
+  } else if(st==='Migración'||st==='Traslado'){
+    specificFields=`
+      <label>Nueva CTO asignada
+        <input name="newCto" placeholder="Ej: CTO 22">
+      </label>
+      <label>Nuevo precinto
+        <input name="newPrecinto" placeholder="Ej: P-110">
+      </label>
+      <label>Equipos reutilizados (descrip.)
+        <textarea name="reusedEquip" rows="2" placeholder="Ej: Se reutilizó ONU anterior, buen estado"></textarea>
+      </label>`;
+  } else if(st==='Recojo de equipo'){
+    specificFields=`
+      <label>Motivo del retiro
+        <select name="retrievalReason">
+          <option>Baja de servicio</option>
+          <option>Cambio de equipo</option>
+          <option>Deuda</option>
+          <option>Otro</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" name="onuReturned" value="si"> ONU entregada
+      </label>
+      <label>
+        <input type="checkbox" name="cableReturned" value="si"> Cable recuperado
+      </label>
+      <label>Estado del equipo recuperado
+        <select name="equipState">
+          <option>Buen estado</option>
+          <option>Dañado</option>
+          <option>Incompleto</option>
+        </select>
+      </label>`;
+  }
+
+  app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="orderDetail(${id})">‹</button><h1>Registrar atención</h1></header>
+<form class="form" id="att">
+  <div class="service-type-badge" style="background:#e8f1ff;border-left:4px solid #2675f5;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-weight:bold;color:#2675f5">🛠 ${esc(st)}</div>
+  <label>Estado inicial del servicio
+    <select name="initialState">
+      <option>Sin servicio</option>
+      <option>Internet intermitente</option>
+      <option>Baja velocidad</option>
+      <option>Baja potencia óptica</option>
+      <option>Equipo averiado</option>
+      <option>CATV sin señal</option>
+      <option>Servicio activo</option>
+    </select>
+  </label>
+  ${specificFields}
+  <label>Observaciones generales
+    <textarea name="observations" rows="3">${esc(currentOrder.observations||'')}</textarea>
+  </label>
+  <label>Notas técnicas
+    <textarea name="technicalNotes" id="techNotes" rows="3">${esc(currentOrder.technicalNotes||'')}</textarea>
+  </label>
+  <button type="button" onclick="askAITech()" style="width:100%;margin-bottom:15px;padding:10px;border-radius:8px;border:1px solid #2675f5;background:#e8f1ff;color:#2675f5;font-weight:bold;cursor:pointer">✨ Autocompletar con IA</button>
+  <button class="primary">Guardar y continuar</button>
+</form></div>`;
+
+  document.querySelector('#att').onsubmit=async e=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const d=Object.fromEntries(fd);
+    // For Recojo, skip photos/materials - go straight to signature
+    currentOrder=await api('/orders/'+id,{method:'PATCH',body:JSON.stringify(d)});
+    if(st==='Recojo de equipo') signature(id);
+    else photos(id);
+  };
+}
 function photos(id){const pics=currentOrder.photos||[];app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="attention(${id})">‹</button><h1>Evidencias fotográficas</h1></header><section class="section"><p>Toma fotografías claras del punto de conexión, cableado, ONU y resultado final.</p><div class="photo-grid">${pics.map((p,i)=>`<div class="photo"><img src="${p.startsWith('http')?p:API.replace('/api','')+p}"></div>`).join('')}</div><label class="upload">📷 Tomar o seleccionar fotografía<input id="photoInput" type="file" accept="image/*" capture="environment"></label><br><button class="primary" onclick="materials(${id})">Continuar</button></section></div>`;document.querySelector('#photoInput').onchange=async e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=async()=>{currentOrder=await api('/orders/'+id+'/photo',{method:'POST',body:JSON.stringify({dataUrl:r.result})});toast('Fotografía guardada');photos(id)};r.readAsDataURL(f)}}
 async function materials(id){const all=await api('/materials');draftMaterials=(currentOrder.materials||[]).map(x=>({...x}));app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="photos(${id})">‹</button><h1>Materiales utilizados</h1></header><section>${all.map(m=>{const q=draftMaterials.find(x=>x.materialId===m.id)?.quantity||0;
 const qrBtn = m.name.includes('ONU') || m.name.includes('Router') ? `<button type="button" onclick="scanQR(${m.id})" style="margin-top:8px;padding:6px 10px;border-radius:8px;border:1px solid #2675f5;background:#e8f1ff;color:#2675f5;font-size:12px;font-weight:bold;cursor:pointer">📷 Escanear QR/MAC</button>` : '';
@@ -42,7 +170,43 @@ canvas.addEventListener('touchstart', e => e.preventDefault(), {passive: false})
 canvas.addEventListener('touchmove', e => e.preventDefault(), {passive: false});
 canvas.onpointerdown=e=>{drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)};canvas.onpointermove=e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke()};canvas.onpointerup=()=>drawing=false;canvas.onpointerleave=()=>drawing=false}
 function clearSig(){ctx.clearRect(0,0,canvas.width,canvas.height)}async function saveSig(id){signatureData=canvas.toDataURL();currentOrder=await api('/orders/'+id,{method:'PATCH',body:JSON.stringify({signature:signatureData})});finish(id)}
-function finish(id){app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="signature(${id})">‹</button><h1>Finalizar orden</h1></header><section class="section"><div class="checklist"><div class="check"><i>✓</i>Información registrada</div><div class="check"><i>✓</i>Fotografías (${currentOrder.photos.length})</div><div class="check"><i>✓</i>Materiales (${currentOrder.materials.length})</div><div class="check"><i>✓</i>Firma del cliente</div></div><form class="form" id="finish"><label>Observaciones finales<textarea name="technicalNotes">${esc(currentOrder.technicalNotes||'Trabajo completado correctamente.')}</textarea></label><button class="success">Finalizar orden</button></form></section></div>`;document.querySelector('#finish').onsubmit=async e=>{e.preventDefault();const d=Object.fromEntries(new FormData(e.target));d.signature=currentOrder.signature;await api('/orders/'+id+'/complete',{method:'POST',body:JSON.stringify(d)});toast('Orden finalizada correctamente');setTimeout(home,800)}}
+function finish(id){
+  const o=currentOrder;
+  app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="signature(${id})">‹</button><h1>Finalizar orden</h1></header>
+<section class="section">
+  <div class="checklist">
+    <div class="check"><i>✓</i>Información técnica registrada</div>
+    <div class="check"><i>✓</i>Fotografías (${(o.photos||[]).length})</div>
+    <div class="check"><i>✓</i>Materiales utilizados (${(o.materials||[]).length})</div>
+    <div class="check"><i>✓</i>Firma del cliente obtenida</div>
+  </div>
+  <form class="form" id="finish">
+    <h3 style="margin-bottom:8px">Comentarios del servicio</h3>
+    <label>Ubicación del equipo instalado
+      <input name="equipLocation" placeholder="Ej: 2do piso, pasillo" value="${esc(o.equipLocation||'')}">
+    </label>
+    <label>Nº de TVs configurados (CATV)
+      <input name="numTvs" type="number" min="0" value="${esc(o.numTvs||0)}">
+    </label>
+    <label>Nivel de señal final (dBm)
+      <input name="signalLevel" placeholder="Ej: -19.5" value="${esc(o.signalLevel||'')}">
+    </label>
+    <label>Observaciones finales / Comentarios al cliente
+      <textarea name="technicalNotes" rows="4">${esc(o.technicalNotes||'Trabajo completado correctamente.')}</textarea>
+    </label>
+    <button class="success">Finalizar orden</button>
+  </form>
+</section></div>`;
+
+  document.querySelector('#finish').onsubmit=async e=>{
+    e.preventDefault();
+    const d=Object.fromEntries(new FormData(e.target));
+    d.signature=o.signature;
+    await api('/orders/'+id+'/complete',{method:'POST',body:JSON.stringify(d)});
+    toast('Orden finalizada correctamente');
+    setTimeout(home,800);
+  };
+}
 async function history(){await loadOrders();const list=orders.filter(x=>['Finalizada','Cancelada'].includes(x.status));app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="home()">‹</button><h1>Historial del técnico</h1></header><section class="section">${list.map(orderCard).join('')||'<div class="empty">Sin historial.</div>'}</section>${nav('history')}</div>`}
 function profile(){app.innerHTML=`<div class="phone"><header class="page-head"><button class="back" onclick="home()">‹</button><h1>Mi perfil</h1></header><section class="profile"><img src="assets/fiberlink-logo.jpg"><h2>${esc(user.name)}</h2><p>Técnico de fibra óptica</p></section><section class="detail-block"><div class="detail-line"><span>Correo</span><b>${esc(user.email)}</b></div><div class="detail-line"><span>Código</span><b>TEC-${String(user.technicianId).padStart(3,'0')}</b></div><div class="detail-line"><span>Empresa</span><b>Fiberlink</b></div></section><section class="section"><button class="primary" style="background:#bd3038" onclick="logout()">Cerrar sesión</button></section>${nav('profile')}</div>`}
 async function logout(){try{await api('/auth/logout',{method:'POST'})}catch{}localStorage.removeItem('techToken');localStorage.removeItem('techUser');token='';user=null;login()}

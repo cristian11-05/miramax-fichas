@@ -35,6 +35,7 @@ async function migrate() {
         name VARCHAR(255) NOT NULL,
         dni VARCHAR(20) NOT NULL,
         phone VARCHAR(50),
+        phone2 VARCHAR(50),
         email VARCHAR(255),
         address TEXT,
         district VARCHAR(100),
@@ -70,6 +71,10 @@ async function migrate() {
         code VARCHAR(50) UNIQUE NOT NULL,
         client_id INT REFERENCES clients(id),
         technician_id INT REFERENCES technicians(id),
+        sede VARCHAR(100),
+        plan VARCHAR(100),
+        cto VARCHAR(50),
+        precinto VARCHAR(50),
         service_type VARCHAR(100),
         description TEXT,
         status VARCHAR(50),
@@ -110,6 +115,15 @@ async function migrate() {
     `);
     console.log('Tablas creadas correctamente.');
 
+    // 1b. Agregar columnas nuevas si no existen (ALTER TABLE seguro)
+    console.log('Aplicando ALTER TABLE para nuevas columnas...');
+    await client.query(`ALTER TABLE IF EXISTS clients ADD COLUMN IF NOT EXISTS phone2 VARCHAR(50);`);
+    await client.query(`ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS sede VARCHAR(100);`);
+    await client.query(`ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS plan VARCHAR(100);`);
+    await client.query(`ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS cto VARCHAR(50);`);
+    await client.query(`ALTER TABLE IF EXISTS orders ADD COLUMN IF NOT EXISTS precinto VARCHAR(50);`);
+    console.log('ALTER TABLE completado.');
+
     // 2. Leer db.json
     console.log('Leyendo datos de db.json...');
     const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
@@ -132,9 +146,9 @@ async function migrate() {
     console.log('Insertando Clientes...');
     for (const c of data.clients) {
       await client.query(`
-        INSERT INTO clients (id, name, dni, phone, email, address, district, reference, status)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      `, [c.id, c.name, c.dni, c.phone, c.email, c.address, c.district, c.reference, c.status]);
+        INSERT INTO clients (id, name, dni, phone, phone2, email, address, district, reference, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `, [c.id, c.name, c.dni, c.phone, c.phone2 || null, c.email, c.address, c.district, c.reference, c.status]);
     }
 
     console.log('Insertando Técnicos...');
@@ -161,12 +175,13 @@ async function migrate() {
 
       await client.query(`
         INSERT INTO orders (
-          id, code, client_id, technician_id, service_type, description, status, priority,
+          id, code, client_id, technician_id, sede, plan, cto, precinto, service_type, description, status, priority,
           scheduled_at, started_at, finished_at, initial_state, observations, technical_notes,
           signature, latitude, longitude
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
       `, [
-        o.id, o.code, o.clientId, o.technicianId, o.serviceType, o.description, o.status, o.priority,
+        o.id, o.code, o.clientId, o.technicianId, o.sede || null, o.plan || null, o.cto || null, o.precinto || null,
+        o.serviceType, o.description, o.status, o.priority,
         scheduledAt, startedAt, finishedAt, o.initialState, o.observations, o.technicalNotes,
         o.signature, o.latitude, o.longitude
       ]);

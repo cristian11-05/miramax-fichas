@@ -4,9 +4,9 @@
     {"id":2,"name":"Luis Flores","email":"tecnico@fiberlink.pe","password":"tecnico123","role":"technician","technicianId":1}
   ],
   "clients": [
-    {"id":1,"name":"Diego Vargas","dni":"45678912","phone":"987654321","email":"diego.vargas@email.com","address":"Av. América Sur 987 - Trujillo","district":"Trujillo","reference":"Frente al mercado","status":"Activo"},
-    {"id":2,"name":"María López","dni":"47851236","phone":"982321654","email":"maria.lopez@email.com","address":"Jr. San Martín 456 - Otuzco","district":"Otuzco","reference":"A media cuadra de la plaza","status":"Activo"},
-    {"id":3,"name":"Carlos Gómez","dni":"43659874","phone":"981456789","email":"carlos.gomez@email.com","address":"Calle Bolognesi 789 - Huamachuco","district":"Huamachuco","reference":"Casa color celeste","status":"Activo"}
+    {"id":1,"name":"Diego Vargas","dni":"45678912","phone":"987654321","phone2":"","email":"diego.vargas@email.com","address":"Av. América Sur 987 - Trujillo","district":"Trujillo","reference":"Frente al mercado","status":"Activo"},
+    {"id":2,"name":"María López","dni":"47851236","phone":"982321654","phone2":"983321655","email":"maria.lopez@email.com","address":"Jr. San Martín 456 - Otuzco","district":"Otuzco","reference":"A media cuadra de la plaza","status":"Activo"},
+    {"id":3,"name":"Carlos Gómez","dni":"43659874","phone":"981456789","phone2":"","email":"carlos.gomez@email.com","address":"Calle Bolognesi 789 - Huamachuco","district":"Huamachuco","reference":"Casa color celeste","status":"Activo"}
   ],
   "technicians": [
     {"id":1,"name":"Luis Flores","dni":"45321456","phone":"987654321","email":"tecnico@fiberlink.pe","specialty":"Fibra óptica FTTH","status":"En campo","zone":"Trujillo","vehicle":"Moto FBL-01"},
@@ -14,18 +14,24 @@
     {"id":3,"name":"Ana Torres","dni":"47896521","phone":"976543210","email":"ana@fiberlink.pe","specialty":"Internet y CATV","status":"Disponible","zone":"Huamachuco","vehicle":"Camioneta FBL-03"}
   ],
   "materials": [
-    {"id":1,"code":"MAT-0001","name":"Cable drop fibra óptica","category":"Fibra óptica","unit":"m","stock":520,"minStock":100,"price":1.8},
-    {"id":2,"code":"MAT-0002","name":"Conector rápido SC/APC","category":"Conectores","unit":"und","stock":68,"minStock":30,"price":4.5},
-    {"id":3,"code":"MAT-0003","name":"Roseta óptica","category":"Fibra óptica","unit":"und","stock":45,"minStock":20,"price":9.5},
-    {"id":4,"code":"MAT-0004","name":"Patchcord SC/APC","category":"Fibra óptica","unit":"und","stock":35,"minStock":15,"price":12},
-    {"id":5,"code":"MAT-0005","name":"ONU WiFi dual band","category":"Equipos","unit":"und","stock":14,"minStock":10,"price":145},
-    {"id":6,"code":"MAT-0006","name":"Mangas de fusión","category":"Consumibles","unit":"und","stock":90,"minStock":40,"price":0.8},
-    {"id":7,"code":"MAT-0007","name":"Grapas para cable drop","category":"Consumibles","unit":"und","stock":28,"minStock":50,"price":0.2}
+    {"id":1,"code":"MAT-0001","name":"Fibra","category":"Fibra óptica","unit":"m","stock":5000,"minStock":1000,"price":0.5},
+    {"id":2,"code":"MAT-0002","name":"Pigtail","category":"Fibra óptica","unit":"und","stock":150,"minStock":50,"price":4.0},
+    {"id":3,"code":"MAT-0003","name":"Patchcord","category":"Fibra óptica","unit":"und","stock":120,"minStock":30,"price":10.0},
+    {"id":4,"code":"MAT-0004","name":"Roseta","category":"Fibra óptica","unit":"und","stock":100,"minStock":20,"price":5.0},
+    {"id":5,"code":"MAT-0005","name":"Micronodo","category":"Equipos CATV","unit":"und","stock":80,"minStock":20,"price":45.0},
+    {"id":6,"code":"MAT-0006","name":"Cable RG6","category":"Coaxial","unit":"m","stock":2000,"minStock":500,"price":0.8},
+    {"id":7,"code":"MAT-0007","name":"Conector RG6","category":"Coaxial","unit":"und","stock":400,"minStock":100,"price":1.0},
+    {"id":8,"code":"MAT-0008","name":"Cable UTP","category":"Redes","unit":"m","stock":1000,"minStock":300,"price":1.2},
+    {"id":9,"code":"MAT-0009","name":"Conector UTP","category":"Redes","unit":"und","stock":500,"minStock":100,"price":0.5},
+    {"id":10,"code":"MAT-0010","name":"Splitter","category":"Coaxial","unit":"und","stock":60,"minStock":15,"price":12.0},
+    {"id":11,"code":"MAT-0011","name":"Mangas de fusión","category":"Consumibles","unit":"und","stock":500,"minStock":100,"price":0.3},
+    {"id":12,"code":"MAT-0012","name":"Herrajes de reten","category":"Consumibles","unit":"und","stock":250,"minStock":50,"price":2.5},
+    {"id":13,"code":"MAT-0013","name":"Onu","category":"Equipos FTTH","unit":"und","stock":45,"minStock":10,"price":120.0}
   ],
   "orders": [
-    {"id":128,"code":"OS-000128","clientId":1,"technicianId":1,"serviceType":"Instalación FTTH","description":"Instalación de internet por fibra óptica y configuración de ONU.","status":"En proceso","priority":"Alta","scheduledAt":"2026-07-17T10:30:00","startedAt":"2026-07-17T10:42:00","finishedAt":null,"initialState":"Sin servicio","observations":"Cliente solicita cobertura WiFi en segundo piso.","technicalNotes":"Tendido de cable drop desde CTO hasta vivienda.","materials":[{"materialId":1,"quantity":38},{"materialId":2,"quantity":2},{"materialId":3,"quantity":1},{"materialId":5,"quantity":1},{"materialId":6,"quantity":2}],"photos":[],"signature":null,"latitude":-8.1116,"longitude":-79.0287},
-    {"id":129,"code":"OS-000129","clientId":2,"technicianId":1,"serviceType":"Mantenimiento de fibra","description":"Revisión de baja potencia óptica y pérdida intermitente.","status":"Pendiente","priority":"Media","scheduledAt":"2026-07-17T14:00:00","startedAt":null,"finishedAt":null,"initialState":"Internet intermitente","observations":"Revisar conector y nivel de potencia.","technicalNotes":"","materials":[],"photos":[],"signature":null,"latitude":-7.9022,"longitude":-78.5652},
-    {"id":130,"code":"OS-000130","clientId":3,"technicianId":2,"serviceType":"Migración a fibra óptica","description":"Migración de enlace antiguo a red FTTH.","status":"Finalizada","priority":"Media","scheduledAt":"2026-07-16T09:00:00","startedAt":"2026-07-16T09:05:00","finishedAt":"2026-07-16T11:20:00","initialState":"Servicio por radio","observations":"Migración completada.","technicalNotes":"Potencia final -19 dBm. Navegación estable.","materials":[{"materialId":1,"quantity":45},{"materialId":2,"quantity":2},{"materialId":3,"quantity":1},{"materialId":5,"quantity":1}],"photos":[],"signature":"Diego Vargas","latitude":-7.8156,"longitude":-78.0496}
+    {"id":128,"code":"OS-000128","clientId":1,"technicianId":1,"sede":"Trujillo","plan":"Internet Hogar + 100 MBPS","cto":"CTO 01","precinto":"P-001","serviceType":"Instalación","description":"Instalación de internet por fibra óptica y configuración de ONU.","status":"En proceso","priority":"Alta","scheduledAt":"2026-07-17T10:30:00","startedAt":"2026-07-17T10:42:00","finishedAt":null,"initialState":"Sin servicio","observations":"Cliente solicita cobertura WiFi en segundo piso.","technicalNotes":"Tendido de cable drop desde CTO hasta vivienda.","materials":[{"materialId":1,"quantity":80},{"materialId":2,"quantity":2},{"materialId":4,"quantity":1},{"materialId":13,"quantity":1},{"materialId":11,"quantity":2}],"photos":[],"signature":null,"latitude":-8.1116,"longitude":-79.0287},
+    {"id":129,"code":"OS-000129","clientId":2,"technicianId":1,"sede":"Otuzco","plan":"Cable Hogar","cto":"CTO 45","precinto":"P-082","serviceType":"Avería","description":"Revisión de baja potencia óptica y pérdida intermitente.","status":"Pendiente","priority":"Media","scheduledAt":"2026-07-17T14:00:00","startedAt":null,"finishedAt":null,"initialState":"Internet intermitente","observations":"Revisar conector y nivel de potencia.","technicalNotes":"","materials":[],"photos":[],"signature":null,"latitude":-7.9022,"longitude":-78.5652},
+    {"id":130,"code":"OS-000130","clientId":3,"technicianId":2,"sede":"Huamachuco","plan":"Duo Hogar","cto":"CTO 12","precinto":"P-104","serviceType":"Migración","description":"Migración de enlace antiguo a red FTTH.","status":"Finalizada","priority":"Media","scheduledAt":"2026-07-16T09:00:00","startedAt":"2026-07-16T09:05:00","finishedAt":"2026-07-16T11:20:00","initialState":"Servicio por radio","observations":"Migración completada.","technicalNotes":"Potencia final -19 dBm. Navegación estable.","materials":[{"materialId":1,"quantity":45},{"materialId":2,"quantity":2},{"materialId":4,"quantity":1},{"materialId":13,"quantity":1}],"photos":[],"signature":"Diego Vargas","latitude":-7.8156,"longitude":-78.0496}
   ],
   "audit": []
 }

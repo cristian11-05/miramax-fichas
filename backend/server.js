@@ -319,15 +319,14 @@ add('POST', '/api/orders', async (req, res) => {
   const u = auth(req, res, 'admin');
   if (!u) return;
   const d = await body(req);
-  
-  try {
-    const { rows } = await pool.query(`SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM orders`);
-    const id = rows[0].next_id;
-    const code = `OS-${String(id).padStart(6, '0')}`;
-    await pool.query(`
-      INSERT INTO orders (id, code, client_id, technician_id, service_type, description, priority, scheduled_at, status)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    `, [id, code, d.clientId, d.technicianId, d.serviceType, d.description, d.priority || 'Media', d.scheduledAt, 'Pendiente']);
+    try {
+      const { rows } = await pool.query(`SELECT COALESCE(MAX(id), 0) + 1 as next_id FROM orders`);
+      const id = rows[0].next_id;
+      const code = `OS-${String(id).padStart(6, '0')}`;
+      await pool.query(`
+        INSERT INTO orders (id, code, client_id, technician_id, sede, plan, cto, precinto, service_type, description, priority, scheduled_at, status)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      `, [id, code, d.clientId, d.technicianId, d.sede || null, d.plan || null, d.cto || null, d.precinto || null, d.serviceType, d.description, d.priority || 'Media', d.scheduledAt, 'Pendiente']);
     
     await audit(u, 'CREAR', 'orders', id);
     json(res, 201, await getOrderWithDetails(id));
